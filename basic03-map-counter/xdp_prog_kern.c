@@ -39,6 +39,11 @@ int  xdp_stats1_func(struct xdp_md *ctx)
 	if (!rec)
 		return XDP_ABORTED;
 
+	void *data_end = (void *)(long)ctx->data_end;
+	void *data     = (void *)(long)ctx->data;
+	__u64 bytes = data_end - data; /* Calculate packet length */
+	lock_xadd(&rec->rx_bytes, bytes);
+
 	/* Multiple CPUs can access data record. Thus, the accounting needs to
 	 * use an atomic operation.
 	 */
